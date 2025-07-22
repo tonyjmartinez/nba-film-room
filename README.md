@@ -21,7 +21,7 @@ The API responds with all games for the specified date and any play-by-play vide
 
 ## Simple Frontend
 
-You can call the API from a static web page. The snippet below shows a minimal example.
+This repository includes a small HTML file under `public/index.html` that can call the API directly from your browser. Its contents are shown below.
 
 ```html
 <!DOCTYPE html>
@@ -47,7 +47,7 @@ You can call the API from a static web page. The snippet below shows a minimal e
 </html>
 ```
 
-Serve the API and open this file in a browser to view the scraped results.
+Start the API and then open `public/index.html` in a browser to view the scraped results.
 
 ## Deploying from your phone
 

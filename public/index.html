@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>NBA Film Room</title>
+</head>
+<body>
+  <input type="date" id="date" />
+  <button id="load">Load Videos</button>
+  <pre id="output"></pre>
+  <script>
+    document.getElementById('load').onclick = async () => {
+      const date = document.getElementById('date').value;
+      if (!date) return;
+      const res = await fetch(`/api/videos?date=${date}`);
+      document.getElementById('output').textContent =
+        JSON.stringify(await res.json(), null, 2);
+    };
+  </script>
+</body>
+</html>
