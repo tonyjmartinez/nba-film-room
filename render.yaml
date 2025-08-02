@@ -2,7 +2,7 @@ services:
   - type: web
     name: my-service
     env: node
-    buildCommand: npm install && npx playwright install --with-deps
+    buildCommand: npm install && npm run build && npx playwright install --with-deps
     startCommand: npm start
     envVars:
       - key: NODE_ENV
