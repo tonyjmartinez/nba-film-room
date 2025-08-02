@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "postinstall": "npx install playwright",
+    "postinstall": "npx playwright install",
     "start": "node server.js"
   },
   "keywords": [],
