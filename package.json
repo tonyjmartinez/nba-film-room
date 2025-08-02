@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "ts-node src/index.ts"
+    "postinstall": "npx playwright install --with-deps",
+    "start": "node server.js"
   },
   "keywords": [],
   "author": "",
