@@ -1,5 +1,5 @@
 import express from 'express';
-import { chromium } from 'playwright';
+import puppeteer from 'puppeteer';
 
 interface Game {
   gameId: string;
@@ -11,31 +11,64 @@ interface GameResult extends Game {
 }
 
 async function getGames(date: string): Promise<Game[]> {
-  const browser = await chromium.launch({ headless: true });
-  const page = await browser.newPage({ ignoreHTTPSErrors: true });
-  await page.goto(`https://www.nba.com/games?date=${date}`, { waitUntil: 'domcontentloaded' });
-  const content = await page.content();
-  await browser.close();
-
-  const matches = Array.from(content.matchAll(/href="\/game\/([^"]+)"/g));
-  const slugs = Array.from(new Set(matches.map(m => m[1])));
-  const games: Game[] = slugs.map(slug => {
-    const idMatch = slug.match(/(\d{10})$/);
-    return { slug, gameId: idMatch ? idMatch[1] : slug };
+  const browser = await puppeteer.launch({
+    headless: true,
+    args: [
+      '--no-sandbox',
+      '--disable-setuid-sandbox',
+      '--disable-dev-shm-usage',
+      '--disable-accelerated-2d-canvas',
+      '--no-first-run',
+      '--no-zygote',
+      '--disable-gpu'
+    ]
   });
-  return games;
+  
+  try {
+    const page = await browser.newPage();
+    await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36');
+    await page.goto(`https://www.nba.com/games?date=${date}`, { waitUntil: 'domcontentloaded' });
+    const content = await page.content();
+    
+    const matches = Array.from(content.matchAll(/href="\/game\/([^"]+)"/g)) as RegExpMatchArray[];
+    const slugs = Array.from(new Set(matches.map(m => m[1])));
+    const games: Game[] = slugs.map(slug => {
+      const idMatch = slug.match(/(\d{10})$/);
+      return { slug, gameId: idMatch ? idMatch[1] : slug };
+    });
+    return games;
+  } finally {
+    await browser.close();
+  }
 }
 
 async function getPlayByPlayVideos(slug: string): Promise<string[]> {
-  const browser = await chromium.launch({ headless: true });
-  const page = await browser.newPage({ ignoreHTTPSErrors: true });
-  await page.goto(`https://www.nba.com/game/${slug}/play-by-play`, { waitUntil: 'domcontentloaded' });
-  await page.waitForTimeout(2000);
-  const content = await page.content();
-  await browser.close();
-  const videoMatches = Array.from(content.matchAll(/https:[^"']+\.mp4/g));
-  const videos = Array.from(new Set(videoMatches.map(m => m[0])));
-  return videos;
+  const browser = await puppeteer.launch({
+    headless: true,
+    args: [
+      '--no-sandbox',
+      '--disable-setuid-sandbox',
+      '--disable-dev-shm-usage',
+      '--disable-accelerated-2d-canvas',
+      '--no-first-run',
+      '--no-zygote',
+      '--disable-gpu'
+    ]
+  });
+  
+  try {
+    const page = await browser.newPage();
+    await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36');
+    await page.goto(`https://www.nba.com/game/${slug}/play-by-play`, { waitUntil: 'domcontentloaded' });
+    await page.waitForTimeout(2000);
+    const content = await page.content();
+    
+    const videoMatches = Array.from(content.matchAll(/https:[^"']+\.mp4/g)) as RegExpMatchArray[];
+    const videos = Array.from(new Set(videoMatches.map(m => m[0])));
+    return videos;
+  } finally {
+    await browser.close();
+  }
 }
 
 async function scrape(date: string): Promise<GameResult[]> {
